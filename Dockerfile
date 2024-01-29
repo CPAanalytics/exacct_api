@@ -1,4 +1,4 @@
-FROM python:3.11-slim-bookworm AS base
+FROM python:3.12 AS base
 RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends curl git build-essential \
@@ -33,8 +33,7 @@ ENV PYTHONPATH=/home/code/ PYTHONHASHSEED=0
 
 COPY tests/ tests/
 COPY app/ app/
-COPY alembic/ alembic/
-COPY .env alembic.ini config.ini ./
+COPY .env config.ini ./
 
 # create a non-root user and switch to it, for security.
 RUN addgroup --system --gid 1001 "app-user"

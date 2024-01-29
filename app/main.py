@@ -1,15 +1,11 @@
 from contextlib import asynccontextmanager
-
 from fastapi import FastAPI, Depends
-
-from app.api.nonsense import router as nonsense_router
-from app.api.shakespeare import router as shakespeare_router
-from app.api.stuff import router as stuff_router
+from fastapi.middleware.cors import CORSMiddleware
 from app.utils.logging import AppLogger
-from app.api.user import router as user_router
 from app.api.health import router as health_router
 from app.redis import get_redis
 from app.services.auth import AuthBearer
+from app.api.functions import router as function_router
 
 logger = AppLogger().get_logger()
 
@@ -27,11 +23,15 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Stuff And Nonsense API", version="0.6", lifespan=lifespan)
 
-app.include_router(stuff_router)
-app.include_router(nonsense_router)
-app.include_router(shakespeare_router)
-app.include_router(user_router)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
+app.include_router(function_router)
 
 app.include_router(health_router, prefix="/v1/public/health", tags=["Health, Public"])
 app.include_router(health_router, prefix="/v1/health", tags=["Health, Bearer"], dependencies=[Depends(AuthBearer())])
